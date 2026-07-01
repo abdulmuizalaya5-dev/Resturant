@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String  @id @default(uuid())
+  name              String
+  email             String  @unique
+  phone             String
+  role              String  // 'customer' | 'owner' | 'admin' | 'worker'
+  avatar            String?
+  assignedComponent String? // 'reservations' | 'tables' | 'restaurants' | 'analytics'
+  accessKey         String?
+}
+
+model Restaurant {
+  id           String  @id @default(uuid())
+  name         String
+  description  String
+  image        String
+  images       String  // JSON list representation
+  rating       Float   @default(5.0)
+  reviewCount  Int     @default(0)
+  cuisine      String
+  priceRange   String  // '$$' | '$$$' | '$$$$'
+  location     String
+  address      String
+  phone        String
+  email        String
+  openingHours String
+  featured     Boolean @default(false)
+  ownerId      String
+  menu         String  // JSON list representation of MenuItem[]
+}
+
+model RestaurantTable {
+  id           String @id @default(uuid())
+  restaurantId String
+  number       String
+  capacity     Int
+  status       String // 'available' | 'reserved' | 'occupied'
+}
+
+model Review {
+  id           String  @id @default(uuid())
+  restaurantId String
+  userName     String
+  userAvatar   String?
+  rating       Int
+  comment      String
+  date         String
+}
+
+model Booking {
+  id              String  @id @default(uuid())
+  restaurantId    String
+  restaurantName  String
+  restaurantImage String
+  customerId      String
+  customerName    String
+  customerEmail   String
+  customerPhone   String
+  date            String
+  time            String
+  guests          Int
+  tableNumber     String?
+  status          String  // 'pending' | 'confirmed' | 'completed' | 'cancelled'
+  createdAt       String
+  specialRequests String?
+  preOrderItems   String? // JSON list representation
+}
