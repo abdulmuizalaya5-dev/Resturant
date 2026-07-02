@@ -311,7 +311,7 @@ app.get('/api/restaurants', async (req, res) => {
     return res.json(restaurants);
   } catch (error) {
     console.error('GET restaurants API error:', error);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return res.status(500).json({ error: 'Internal Server Error', details: error.message });
   }
 });
 
