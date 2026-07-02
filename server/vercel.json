@@ -6,6 +6,11 @@
       "use": "@vercel/node"
     }
   ],
+  "functions": {
+    "app.js": {
+      "includeFiles": "prisma/dev.db"
+    }
+  },
   "routes": [
     {
       "src": "/(.*)",
