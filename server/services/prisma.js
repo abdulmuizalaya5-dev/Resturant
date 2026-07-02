@@ -15,14 +15,15 @@ if (isVercel) {
     try {
       if (fs.existsSync(bundledDbPath)) {
         fs.copyFileSync(bundledDbPath, tmpDbPath);
-        // Vercel's source files are read-only, so the copied file inherits read-only permissions.
-        // We must explicitly make the copied file writable!
-        fs.chmodSync(tmpDbPath, 0o666);
       }
     } catch (err) {
       console.error('Failed to copy DB to /tmp:', err);
     }
   }
+  try {
+    // Always ensure it's writable, even if left over from a previous warm boot
+    fs.chmodSync(tmpDbPath, 0o666);
+  } catch (e) {}
   dbUrl = `file:${tmpDbPath}`;
 } else if (!dbUrl) {
   dbUrl = `file:${bundledDbPath}`;
