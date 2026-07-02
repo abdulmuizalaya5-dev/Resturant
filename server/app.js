@@ -81,7 +81,7 @@ app.post('/api/auth/register', async (req, res) => {
     return res.json({ success: true, user: newUser, token });
   } catch (error) {
     console.error('Register API error:', error);
-    return res.status(500).json({ success: false, error: 'Internal Server Error' });
+    return res.status(500).json({ success: false, error: 'Internal Server Error', details: error.message || String(error) });
   }
 });
 
