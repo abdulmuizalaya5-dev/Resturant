@@ -31,8 +31,8 @@ if (isVercel) {
 
 // CRITICAL: Prisma's Rust engine automatically reads process.env.DATABASE_URL.
 // If the user added invalid quotes in the Vercel dashboard, Prisma crashes.
-// We override the environment variable dynamically here to guarantee it uses our valid dbUrl!
-process.env.DATABASE_URL = dbUrl;
+// We must DELETE the environment variable so Prisma safely ignores it and uses the hardcoded fallback which we override!
+delete process.env.DATABASE_URL;
 
 const prisma = new PrismaClient({
   datasources: {
