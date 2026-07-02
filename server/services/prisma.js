@@ -4,26 +4,28 @@ const path = require('path');
 
 let dbUrl = process.env.DATABASE_URL;
 
-if (!dbUrl) {
-  const bundledDbPath = path.join(process.cwd(), 'prisma', 'dev.db');
-  // Check if we are in a read-only environment (like Vercel serverless)
-  const isVercel = process.env.VERCEL || !fs.existsSync(path.join(process.cwd(), '.env'));
-  
-  if (isVercel) {
-    const tmpDbPath = '/tmp/dev.db';
-    if (!fs.existsSync(tmpDbPath)) {
-      try {
-        if (fs.existsSync(bundledDbPath)) {
-          fs.copyFileSync(bundledDbPath, tmpDbPath);
-        }
-      } catch (err) {
-        console.error('Failed to copy DB to /tmp:', err);
+const bundledDbPath = path.join(process.cwd(), 'prisma', 'dev.db');
+// Check if we are in a read-only environment (like Vercel serverless)
+const isVercel = process.env.VERCEL || !fs.existsSync(path.join(process.cwd(), '.env'));
+
+if (isVercel) {
+  // Ignore Vercel environment DATABASE_URL because it's either invalid or unsupported for SQLite
+  const tmpDbPath = '/tmp/dev.db';
+  if (!fs.existsSync(tmpDbPath)) {
+    try {
+      if (fs.existsSync(bundledDbPath)) {
+        fs.copyFileSync(bundledDbPath, tmpDbPath);
+        // Vercel's source files are read-only, so the copied file inherits read-only permissions.
+        // We must explicitly make the copied file writable!
+        fs.chmodSync(tmpDbPath, 0o666);
       }
+    } catch (err) {
+      console.error('Failed to copy DB to /tmp:', err);
     }
-    dbUrl = `file:${tmpDbPath}`;
-  } else {
-    dbUrl = `file:${bundledDbPath}`;
   }
+  dbUrl = `file:${tmpDbPath}`;
+} else if (!dbUrl) {
+  dbUrl = `file:${bundledDbPath}`;
 }
 
 const prisma = new PrismaClient({
