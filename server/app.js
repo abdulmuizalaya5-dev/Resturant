@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'cyan-reserve-jwt-secret-key-1234567890';
 
 // Middlewares
-app.use(cors());
+app.use(cors({ origin: ['http://localhost:3000', 'https://resturant-two-umber.vercel.app'], credentials: true }));
 app.use(express.json());
 
 // Seeding hook on boot
