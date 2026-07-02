@@ -3,10 +3,13 @@ const fs = require('fs');
 const path = require('path');
 
 let dbUrl = process.env.DATABASE_URL;
+if (dbUrl && dbUrl.startsWith('"') && dbUrl.endsWith('"')) {
+  dbUrl = dbUrl.slice(1, -1);
+}
 
 const bundledDbPath = path.join(process.cwd(), 'prisma', 'dev.db');
 // Check if we are in a read-only environment (like Vercel serverless)
-const isVercel = process.env.VERCEL || !fs.existsSync(path.join(process.cwd(), '.env'));
+const isVercel = process.env.VERCEL || process.env.VERCEL_ENV || process.env.VERCEL_REGION || !fs.existsSync(path.join(process.cwd(), '.env'));
 
 if (isVercel) {
   // Ignore Vercel environment DATABASE_URL because it's either invalid or unsupported for SQLite
@@ -24,7 +27,7 @@ if (isVercel) {
     // Always ensure it's writable, even if left over from a previous warm boot
     fs.chmodSync(tmpDbPath, 0o666);
   } catch (e) {}
-    dbUrl = `file:///${tmpDbPath.replace(/^\//, '')}`;
+    dbUrl = `file:${tmpDbPath}`; // use file:/tmp/dev.db instead of file:///
 } else if (!dbUrl) {
   dbUrl = `file:${bundledDbPath}`;
 }
