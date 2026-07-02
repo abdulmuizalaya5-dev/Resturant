@@ -24,15 +24,15 @@ if (isVercel) {
     // Always ensure it's writable, even if left over from a previous warm boot
     fs.chmodSync(tmpDbPath, 0o666);
   } catch (e) {}
-    dbUrl = `file:${tmpDbPath}`;
+    dbUrl = `file:///${tmpDbPath.replace(/^\//, '')}`;
 } else if (!dbUrl) {
   dbUrl = `file:${bundledDbPath}`;
 }
 
 // CRITICAL: Prisma's Rust engine automatically reads process.env.DATABASE_URL.
-// If the user added invalid quotes in the Vercel dashboard (e.g. `"file:./dev.db"`), Prisma crashes before we can even override it.
-// We MUST delete it from the environment so Prisma is forced to use our provided dbUrl!
-delete process.env.DATABASE_URL;
+// If the user added invalid quotes in the Vercel dashboard, Prisma crashes.
+// We override the environment variable dynamically here to guarantee it uses our valid dbUrl!
+process.env.DATABASE_URL = dbUrl;
 
 const prisma = new PrismaClient({
   datasources: {
