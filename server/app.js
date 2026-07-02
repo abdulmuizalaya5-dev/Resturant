@@ -695,3 +695,6 @@ app.post('/api/restaurants/reviews', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 CyanReserve backend server running on http://localhost:${PORT}`);
 });
+
+app.get('/api/health', (req, res) => res.json({ status: 'ok', version: '2' }));
+
