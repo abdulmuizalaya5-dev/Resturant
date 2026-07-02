@@ -5,7 +5,7 @@ const path = require('path');
 let dbUrl = process.env.DATABASE_URL;
 
 if (!dbUrl) {
-  const bundledDbPath = path.join(process.cwd(), 'dev.db');
+  const bundledDbPath = path.join(process.cwd(), 'prisma', 'dev.db');
   // Check if we are in a read-only environment (like Vercel serverless)
   const isVercel = process.env.VERCEL || !fs.existsSync(path.join(process.cwd(), '.env'));
   
