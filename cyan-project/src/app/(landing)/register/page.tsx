@@ -197,7 +197,7 @@ export default function RegisterPage() {
           <div className="grid grid-cols-2 gap-3 mb-4">
             <GoogleSignIn
               role={role}
-              buttonText="Google"
+              textType="signup_with"
               onError={(err) => setError(err)}
             />
             <button
