@@ -10,7 +10,23 @@ const {
 async function seedPrismaIfNeeded() {
   try {
     const userCount = await prisma.user.count();
-    if (userCount > 0) return; // Database already seeded
+    if (userCount > 0) {
+      // Force update restaurant images in case they are missing or broken in the existing DB
+      for (const r of mockRestaurants) {
+        try {
+          await prisma.restaurant.update({
+            where: { id: r.id },
+            data: {
+              image: r.image,
+              images: JSON.stringify(r.images),
+            }
+          });
+        } catch (e) {
+          console.error("Could not update restaurant image:", e);
+        }
+      }
+      return; // Database already seeded
+    }
     
     console.log('Seeding SQLite database with mock data...');
 
