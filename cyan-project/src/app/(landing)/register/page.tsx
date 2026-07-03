@@ -8,6 +8,7 @@ import { useAppState } from '@/services/appState';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
+import { GoogleSignIn } from '@/components/GoogleSignIn';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -183,6 +184,29 @@ export default function RegisterPage() {
               {loading ? 'Creating Account...' : 'Register'}
             </Button>
           </form>
+
+          {/* Social Sign Up Divider */}
+          <div className="relative flex items-center justify-center my-4">
+            <span className="absolute w-full border-t border-neutral-900" />
+            <span className="relative px-3 bg-neutral-950 text-[10px] uppercase font-bold tracking-wider text-neutral-600">
+              Or sign up with
+            </span>
+          </div>
+
+          {/* Social Buttons */}
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <GoogleSignIn
+              role={role}
+              buttonText="Google"
+              onError={(err) => setError(err)}
+            />
+            <button
+              type="button"
+              className="flex items-center justify-center py-2 px-3 bg-neutral-900 border border-neutral-805 rounded-xl text-xs font-semibold hover:bg-neutral-850 cursor-pointer transition-colors text-neutral-400"
+            >
+              <span>Apple ID</span>
+            </button>
+          </div>
 
           <div className="text-center text-xs text-neutral-500 border-t border-neutral-900 pt-4">
             <span>Already have an account? </span>

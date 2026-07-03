@@ -179,6 +179,87 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+app.post('/api/auth/google', async (req, res) => {
+  try {
+    const { token, name, email, avatar, isMock } = req.body;
+
+    let verifiedEmail = '';
+    let verifiedName = '';
+    let verifiedAvatar = '';
+
+    if (isMock) {
+      // Mock flow for dev/fallback
+      verifiedEmail = email?.toLowerCase().trim();
+      verifiedName = name || email?.split('@')[0] || 'Google User';
+      verifiedAvatar = avatar || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80';
+    } else {
+      if (!token) {
+        return res.status(400).json({ success: false, error: 'Google ID Token is required.' });
+      }
+
+      // Verify Google ID Token using Google's OAuth2 API endpoint
+      const googleRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${token}`);
+      if (!googleRes.ok) {
+        return res.status(400).json({ success: false, error: 'Failed to verify Google Token.' });
+      }
+
+      const googlePayload = await googleRes.json();
+      
+      if (!googlePayload.email) {
+        return res.status(400).json({ success: false, error: 'Invalid Google Token payload: email missing.' });
+      }
+
+      verifiedEmail = googlePayload.email.toLowerCase().trim();
+      verifiedName = googlePayload.name || verifiedEmail.split('@')[0];
+      verifiedAvatar = googlePayload.picture || `https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80`;
+    }
+
+    if (!verifiedEmail) {
+      return res.status(400).json({ success: false, error: 'Email verification failed.' });
+    }
+
+    // Check if the user exists
+    let user = await prisma.user.findFirst({ where: { email: verifiedEmail } });
+    let isNewUser = false;
+
+    if (!user) {
+      // Create user
+      user = await prisma.user.create({
+        data: {
+          id: `usr-${Date.now()}`,
+          name: verifiedName,
+          email: verifiedEmail,
+          phone: '+1 (555) 555-5555',
+          role: 'customer',
+          avatar: verifiedAvatar,
+        }
+      });
+      isNewUser = true;
+    }
+
+    const jwtToken = jwt.sign(
+      { userId: user.id, email: user.email, role: user.role },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    if (isNewUser) {
+      // Send welcome email (async non-blocking)
+      sendWelcomeEmail({
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }).catch(err => console.error('[Google Sign-up] Welcome email failed:', err));
+    }
+
+    return res.json({ success: true, user, token: jwtToken, isNewUser });
+  } catch (error) {
+    console.error('Google Auth API error:', error);
+    return res.status(500).json({ success: false, error: 'Internal Server Error' });
+  }
+});
+
+
 
 // ─── USER ROUTE HANDLERS ──────────────────────────────────────────────────────
 

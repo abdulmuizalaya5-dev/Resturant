@@ -8,6 +8,7 @@ import { useAppState } from '@/services/appState';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
+import { GoogleSignIn } from '@/components/GoogleSignIn';
 
 export default function DinerLoginPage() {
   const router = useRouter();
@@ -127,15 +128,13 @@ export default function DinerLoginPage() {
 
           {/* Social Buttons */}
           <div className="grid grid-cols-2 gap-3">
+            <GoogleSignIn
+              role="customer"
+              onError={(err) => setError(err)}
+            />
             <button
               type="button"
-              className="flex items-center justify-center py-2 px-3 bg-neutral-900 border border-neutral-800 rounded-lg text-xs font-semibold hover:bg-neutral-850 cursor-pointer transition-colors"
-            >
-              <span>Google</span>
-            </button>
-            <button
-              type="button"
-              className="flex items-center justify-center py-2 px-3 bg-neutral-900 border border-neutral-800 rounded-lg text-xs font-semibold hover:bg-neutral-850 cursor-pointer transition-colors"
+              className="flex items-center justify-center py-2 px-3 bg-neutral-900 border border-neutral-800 rounded-lg text-xs font-semibold hover:bg-neutral-850 cursor-pointer transition-colors text-neutral-400"
             >
               <span>Apple ID</span>
             </button>

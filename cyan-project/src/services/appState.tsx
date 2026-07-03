@@ -19,6 +19,13 @@ interface AppStateContextType {
     key?: string;
     role: 'customer' | 'owner' | 'admin' | 'worker';
   }) => Promise<{ success: boolean; error?: string }>;
+  loginWithGoogle: (googleData: {
+    token?: string;
+    name?: string;
+    email?: string;
+    avatar?: string;
+    isMock?: boolean;
+  }) => Promise<{ success: boolean; error?: string; isNewUser?: boolean; user?: any; token?: string }>;
   logout: () => void;
   register: (name: string, email: string, phone: string, role: 'customer' | 'owner') => Promise<{ success: boolean; error?: string }>;
   switchUserRole: (role: User['role']) => void;
@@ -218,6 +225,38 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return result;
     } catch (err) {
       console.error('Login Request Failed:', err);
+      return { success: false, error: 'Network error or backend server is offline.' };
+    }
+  };
+
+  const loginWithGoogle = async (googleData: {
+    token?: string;
+    name?: string;
+    email?: string;
+    avatar?: string;
+    isMock?: boolean;
+  }): Promise<{ success: boolean; error?: string; isNewUser?: boolean; user?: any; token?: string }> => {
+    try {
+      const response = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(googleData)
+      });
+      const result = await response.json();
+      if (result.success) {
+        setCurrentUser(result.user);
+        setToken(result.token);
+        // Fetch new data for the logged in user immediately!
+        fetchData(result.token);
+        // Refresh local user records list
+        setUsers(prev => {
+          if (prev.some(u => u.id === result.user.id)) return prev;
+          return [...prev, result.user];
+        });
+      }
+      return result;
+    } catch (err) {
+      console.error('Google Login Request Failed:', err);
       return { success: false, error: 'Network error or backend server is offline.' };
     }
   };
@@ -484,6 +523,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         removePaymentMethod,
         setDefaultPaymentMethod,
         login,
+        loginWithGoogle,
         logout,
         register,
         switchUserRole,
