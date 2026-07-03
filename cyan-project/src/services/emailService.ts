@@ -279,3 +279,59 @@ export async function sendBookingConfirmationEmail(booking: {
     textContent: `Hi ${firstName}! Your table at ${booking.restaurantName} on ${booking.date} at ${booking.time} for ${booking.guests} guests has been received. Booking ref: ${booking.id}. View at: ${appUrl}/dashboard/customer`,
   });
 }
+
+// ─── 3. Login Alert email (sent after successful login) ──────────────────────
+
+export async function sendLoginAlertEmail(user: {
+  name: string;
+  email: string;
+  role: string;
+}): Promise<{ success: boolean; error?: string }> {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+  const loginTime = new Date().toLocaleString('en-US', {
+    dateStyle: 'full',
+    timeStyle: 'long',
+  });
+
+  const bodyHtml = `
+    <h1 class="title">New Sign-In Detected 🔒</h1>
+    <p class="subtitle">
+      Hi ${user.name.split(' ')[0]}, we detected a new sign-in to your CyanReserve account.
+    </p>
+
+    <div class="card">
+      <div class="card-row">
+        <span class="card-label">Account</span>
+        <span class="card-value">${user.email}</span>
+      </div>
+      <div class="card-row">
+        <span class="card-label">Date & Time</span>
+        <span class="card-value">${loginTime}</span>
+      </div>
+      <div class="card-row">
+        <span class="card-label">Account Role</span>
+        <span class="card-value"><span class="badge">${user.role}</span></span>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <p style="font-size:12px;color:#71717a;line-height:1.6;text-align:center;">
+      If this was you, you can safely ignore this email. If you did not sign in to your account, please secure your account immediately or contact support.
+    </p>
+
+    <a href="${appUrl}/dashboard/customer" class="btn">Go to Dashboard →</a>
+  `;
+
+  return sendBrevoEmail({
+    sender: {
+      email: process.env.BREVO_FROM_EMAIL ?? 'noreply@cyanreserve.com',
+      name:  process.env.BREVO_FROM_NAME  ?? 'CyanReserve',
+    },
+    to: [{ email: user.email, name: user.name }],
+    subject: `Security Alert: New sign-in to CyanReserve 🔐`,
+    htmlContent: emailWrapper(bodyHtml),
+    textContent: `Hi ${user.name}! A new sign-in was detected on your account at ${loginTime}. If this wasn't you, please secure your account immediately.`,
+  });
+}
+

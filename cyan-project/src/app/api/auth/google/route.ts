@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/services/prisma';
 import { signToken } from '@/services/jwt';
-import { sendWelcomeEmail } from '@/services/emailService';
+import { sendWelcomeEmail, sendLoginAlertEmail } from '@/services/emailService';
 
 export async function POST(request: Request) {
   try {
@@ -76,6 +76,13 @@ export async function POST(request: Request) {
         email: user.email,
         role: user.role,
       }).catch(err => console.error('[Google Sign-up] Welcome email failed:', err));
+    } else {
+      // Send login alert email (async non-blocking)
+      sendLoginAlertEmail({
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      }).catch(err => console.error('[Google Login Alert] Email failed:', err));
     }
 
     return NextResponse.json({ success: true, user, token: jwtToken, isNewUser });

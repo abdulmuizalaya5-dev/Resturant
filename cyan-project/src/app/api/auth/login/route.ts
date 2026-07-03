@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/services/prisma';
 import { signToken } from '@/services/jwt';
+import { sendLoginAlertEmail } from '@/services/emailService';
 
 export async function POST(request: Request) {
   try {
@@ -89,6 +90,13 @@ export async function POST(request: Request) {
       email: authenticatedUser.email,
       role: authenticatedUser.role
     });
+
+    // Send login alert email (async non-blocking)
+    sendLoginAlertEmail({
+      name: authenticatedUser.name,
+      email: authenticatedUser.email,
+      role: authenticatedUser.role
+    }).catch(err => console.error('[Login Alert] Email failed:', err));
 
     return NextResponse.json({ success: true, user: authenticatedUser, token });
   } catch (error) {

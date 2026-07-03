@@ -4,7 +4,7 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const prisma = require('./services/prisma');
 const { seedPrismaIfNeeded } = require('./services/dbHelper');
-const { sendWelcomeEmail, sendBookingConfirmationEmail } = require('./services/emailService');
+const { sendWelcomeEmail, sendBookingConfirmationEmail, sendLoginAlertEmail } = require('./services/emailService');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -172,6 +172,13 @@ app.post('/api/auth/login', async (req, res) => {
       { expiresIn: '7d' }
     );
 
+    // Send login alert email (async non-blocking)
+    sendLoginAlertEmail({
+      name: authenticatedUser.name,
+      email: authenticatedUser.email,
+      role: authenticatedUser.role
+    }).catch(err => console.error('[Login Alert] Email failed:', err));
+
     return res.json({ success: true, user: authenticatedUser, token });
   } catch (error) {
     console.error('Login API error:', error);
@@ -250,6 +257,13 @@ app.post('/api/auth/google', async (req, res) => {
         email: user.email,
         role: user.role
       }).catch(err => console.error('[Google Sign-up] Welcome email failed:', err));
+    } else {
+      // Send login alert email (async non-blocking)
+      sendLoginAlertEmail({
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }).catch(err => console.error('[Google Login Alert] Email failed:', err));
     }
 
     return res.json({ success: true, user, token: jwtToken, isNewUser });
