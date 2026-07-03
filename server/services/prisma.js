@@ -20,14 +20,15 @@ const isVercel = process.env.VERCEL || process.env.VERCEL_ENV || process.env.VER
 if (isVercel) {
   // Ignore Vercel environment DATABASE_URL because it's either invalid or unsupported for SQLite
   const tmpDbPath = '/tmp/dev.db';
-  if (!fs.existsSync(tmpDbPath)) {
-    try {
-      if (fs.existsSync(bundledDbPath)) {
-        fs.copyFileSync(bundledDbPath, tmpDbPath);
-      }
-    } catch (err) {
-      console.error('Failed to copy DB to /tmp:', err);
+  try {
+    if (fs.existsSync(bundledDbPath)) {
+      fs.copyFileSync(bundledDbPath, tmpDbPath);
+      console.log('Successfully copied fresh DB to /tmp');
+    } else {
+      console.error('Bundled DB path does not exist:', bundledDbPath);
     }
+  } catch (err) {
+    console.error('Failed to copy DB to /tmp:', err);
   }
   try {
     // Always ensure it's writable, even if left over from a previous warm boot
