@@ -59,9 +59,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'bookingData is required.' }, { status: 400 });
     }
 
-    const dbUser = await prisma.user.findUnique({ where: { id: authUser.userId } });
+    let dbUser = await prisma.user.findUnique({ where: { id: authUser.userId } });
     if (!dbUser) {
-      return NextResponse.json({ error: 'Authenticated user account not found.' }, { status: 404 });
+      dbUser = await prisma.user.create({
+        data: {
+          id: authUser.userId,
+          name: authUser.name || authUser.email.split('@')[0],
+          email: authUser.email,
+          phone: '+1 (555) 555-5555',
+          role: authUser.role || 'customer',
+        },
+      });
     }
 
     const restaurant = await prisma.restaurant.findUnique({ where: { id: bookingData.restaurantId } });

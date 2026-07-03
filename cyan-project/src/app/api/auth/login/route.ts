@@ -88,7 +88,8 @@ export async function POST(request: Request) {
     const token = await signToken({
       userId: authenticatedUser.id,
       email: authenticatedUser.email,
-      role: authenticatedUser.role
+      role: authenticatedUser.role,
+      name: authenticatedUser.name,
     });
 
     // Send login alert email (async non-blocking)

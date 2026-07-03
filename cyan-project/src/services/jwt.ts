@@ -4,7 +4,7 @@ const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || 'cyan-reserve-jwt-secret-key-1234567890'
 );
 
-export async function signToken(payload: { userId: string; email: string; role: string }) {
+export async function signToken(payload: { userId: string; email: string; role: string; name?: string }) {
   return new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
@@ -15,7 +15,7 @@ export async function signToken(payload: { userId: string; email: string; role: 
 export async function verifyToken(token: string) {
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET);
-    return payload as { userId: string; email: string; role: string };
+    return payload as { userId: string; email: string; role: string; name?: string };
   } catch (err) {
     return null;
   }

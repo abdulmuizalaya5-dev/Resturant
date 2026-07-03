@@ -66,7 +66,7 @@ app.post('/api/auth/register', async (req, res) => {
     });
 
     const token = jwt.sign(
-      { userId: newUser.id, email: newUser.email, role: newUser.role },
+      { userId: newUser.id, email: newUser.email, role: newUser.role, name: newUser.name },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -167,7 +167,7 @@ app.post('/api/auth/login', async (req, res) => {
     }
 
     const token = jwt.sign(
-      { userId: authenticatedUser.id, email: authenticatedUser.email, role: authenticatedUser.role },
+      { userId: authenticatedUser.id, email: authenticatedUser.email, role: authenticatedUser.role, name: authenticatedUser.name },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -245,7 +245,7 @@ app.post('/api/auth/google', async (req, res) => {
     }
 
     const jwtToken = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
+      { userId: user.id, email: user.email, role: user.role, name: user.name },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -543,9 +543,18 @@ app.post('/api/bookings', async (req, res) => {
       return res.status(400).json({ error: 'bookingData is required.' });
     }
 
-    const dbUser = await prisma.user.findUnique({ where: { id: authUser.userId } });
+    let dbUser = await prisma.user.findUnique({ where: { id: authUser.userId } });
     if (!dbUser) {
-      return res.status(404).json({ error: 'User not found.' });
+      // Ephemeral Vercel database container fallback: auto-restore user account on-the-fly
+      dbUser = await prisma.user.create({
+        data: {
+          id: authUser.userId,
+          name: authUser.name || authUser.email.split('@')[0],
+          email: authUser.email,
+          phone: '+1 (555) 555-5555',
+          role: authUser.role || 'customer'
+        }
+      });
     }
 
     const restaurant = await prisma.restaurant.findUnique({ where: { id: bookingData.restaurantId } });

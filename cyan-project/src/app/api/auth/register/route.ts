@@ -45,6 +45,7 @@ export async function POST(request: Request) {
       userId: newUser.id,
       email:  newUser.email,
       role:   newUser.role,
+      name:   newUser.name,
     });
 
     // ── Send welcome email via Brevo (non-blocking – don't fail registration if email errors) ──
