@@ -10,6 +10,7 @@ import { Calendar } from '@/components/Calendar';
 import { TimeSlotPicker } from '@/components/TimeSlotPicker';
 import { ReviewCard } from '@/components/ReviewCard';
 import { Modal } from '@/components/Modal';
+import { GoogleSignIn } from '@/components/GoogleSignIn';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -578,6 +579,21 @@ export default function RestaurantDetailsPage({ params }: PageProps) {
                 Register
               </Button>
             </Link>
+          </div>
+
+          <div className="relative flex items-center justify-center my-3">
+            <span className="absolute w-full border-t border-neutral-900" />
+            <span className="relative px-2.5 bg-neutral-950 text-[10px] uppercase font-bold tracking-wider text-neutral-600">
+              Or continue with
+            </span>
+          </div>
+
+          <div className="w-full flex justify-center">
+            <GoogleSignIn
+              role="customer"
+              textType="signin_with"
+              onSuccess={() => setAuthRequiredModalOpen(false)}
+            />
           </div>
         </div>
       </Modal>
