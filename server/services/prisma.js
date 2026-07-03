@@ -13,7 +13,7 @@ if (dbUrl && dbUrl.startsWith('"') && dbUrl.endsWith('"')) {
   dbUrl = dbUrl.slice(1, -1);
 }
 
-const bundledDbPath = path.join(process.cwd(), 'prisma', 'dev.db');
+const bundledDbPath = path.join(__dirname, '..', 'prisma', 'dev.db');
 // Check if we are in a read-only environment (like Vercel serverless)
 const isVercel = process.env.VERCEL || process.env.VERCEL_ENV || process.env.VERCEL_REGION || !fs.existsSync(path.join(process.cwd(), '.env'));
 
