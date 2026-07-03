@@ -9,6 +9,7 @@ import { Button } from '@/components/Button';
 import { Modal } from '@/components/Modal';
 import { Calendar } from '@/components/Calendar';
 import { TimeSlotPicker } from '@/components/TimeSlotPicker';
+import { GoogleSignIn } from '@/components/GoogleSignIn';
 
 // High-quality background images for the Hero slideshow
 const heroImages = [
@@ -1026,6 +1027,21 @@ export default function Home() {
                 >
                   Sign Up
                 </button>
+              </div>
+
+              <div className="relative flex items-center justify-center my-3">
+                <span className="absolute w-full border-t border-neutral-900" />
+                <span className="relative px-2.5 bg-neutral-950 text-[10px] uppercase font-bold tracking-wider text-neutral-600">
+                  Or continue with
+                </span>
+              </div>
+
+              <div className="w-full flex justify-center">
+                <GoogleSignIn
+                  role="customer"
+                  textType="signin_with"
+                  onSuccess={() => setBookingModalOpen(false)}
+                />
               </div>
             </div>
           </div>
