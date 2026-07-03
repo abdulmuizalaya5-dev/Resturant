@@ -35,20 +35,29 @@ if (isVercel) {
     fs.chmodSync(tmpDbPath, 0o666);
   } catch (e) {}
     dbUrl = `file:${tmpDbPath}`; // use file:/tmp/dev.db instead of file:///
-} else if (!dbUrl) {
-  dbUrl = `file:${bundledDbPath}`;
 }
 
 // We must DELETE the environment variable so Prisma safely ignores it and uses our runtime datasource override!
 delete process.env.DATABASE_URL;
 
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: dbUrl,
+let prisma;
+if (isVercel) {
+  if (dbUrl) {
+    dbUrl = dbUrl.replace(/\\/g, '/');
+  }
+  prisma = new PrismaClient({
+    datasources: {
+      db: {
+        url: dbUrl,
+      },
     },
-  },
-  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error']
-});
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error']
+  });
+} else {
+  // Local development: use the default config from schema.prisma (file:./dev.db)
+  prisma = new PrismaClient({
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error']
+  });
+}
 
 module.exports = prisma;
