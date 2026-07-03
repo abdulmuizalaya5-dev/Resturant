@@ -1,3 +1,9 @@
+// CRITICAL: We must delete process.env.DATABASE_URL before requiring PrismaClient
+// if it's not a SQLite URL (e.g. MongoDB URL from Vercel settings), to prevent validation crashes.
+if (process.env.DATABASE_URL && !process.env.DATABASE_URL.startsWith('file:')) {
+  delete process.env.DATABASE_URL;
+}
+
 const { PrismaClient } = require('@prisma/client');
 const fs = require('fs');
 const path = require('path');
